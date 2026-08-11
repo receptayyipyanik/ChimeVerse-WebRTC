@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-posta Doğrulama - ChimeVerse</title>
+    <style>
+        :root {
+            --bg-color: #020617;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, #1e3a8a, var(--bg-color) 60%);
+        }
+
+        .auth-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-main); }
+        p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.2rem;
+            text-align: center;
+            letter-spacing: 5px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .error-message { color: #ef4444; font-size: 0.9rem; margin-top: 1rem; display: none; }
+        .success-message { color: #10b981; font-size: 0.9rem; margin-top: 1rem; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Güvenlik Doğrulaması</h2>
+        <p>Hesabınızı aktifleştirmek için e-posta adresinize gönderilen 6 haneli doğrulama kodunu giriniz.</p>
+        
+        <form id="dogrulamaFormu">
+            <div class="input-group">
+                <label for="otpCode">Doğrulama Kodu</label>
+                <input type="text" id="otpCode" maxlength="6" placeholder="------" required autocomplete="off">
+            </div>
+            
+            <button type="submit">Hesabımı Doğrula</button>
+            <div id="mesaj" class="error-message"></div>
+        </form>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eposta = urlParams.get('eposta');
+
+        if (!eposta) {
+            alert("Geçersiz işlem. Lütfen önce kayıt olun.");
+            window.location.href = "kayit.html";
+        }
+
+        document.getElementById('dogrulamaFormu').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otpCode').value;
+            const mesajDiv = document.getElementById('mesaj');
+
+            try {
+                const response = await fetch(`${API_URL}/api/dogrula`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eposta, otp })
+                });
+
+                const data = await response.json();
+
+                if (data.basarili) {
+                    mesajDiv.className = 'success-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = data.yonlendir || 'giris.html';
+                    }, 2000);
+                } else {
+                    mesajDiv.className = 'error-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                }
+            } catch (error) {
+                mesajDiv.className = 'error-message';
+                mesajDiv.textContent = 'Sunucuya bağlanılamadı.';
+                mesajDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
