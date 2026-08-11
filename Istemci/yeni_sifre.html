@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Şifre Belirle - ChimeVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, #1e3a8a, var(--bg-color) 60%);
+        }
+
+        .auth-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-main); }
+        p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .error-message { color: #ef4444; font-size: 0.9rem; margin-top: 1rem; display: none; }
+        .success-message { color: #10b981; font-size: 0.9rem; margin-top: 1rem; display: none; }
+        
+        .sifre-kutu { position: relative; width: 100%; }
+        .sifre-kutu input { padding-right: 40px; }
+        .goz-ikonu { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; user-select: none; }
+        .goz-ikonu:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Yeni Şifre Belirle</h2>
+        <p>E-postanıza gelen 6 haneli kodu ve yeni şifrenizi girin.</p>
+        
+        <form id="yeniSifreFormu">
+            <div class="input-group">
+                <label>Doğrulama Kodu</label>
+                <input type="text" id="otpCode" maxlength="6" placeholder="------" required autocomplete="off" style="text-align: center; letter-spacing: 5px;">
+            </div>
+
+            <div class="input-group sifre-kutu">
+                <label>Yeni Şifre</label>
+                <input type="password" id="yeniSifre" placeholder="Şifreniz" required>
+                <span class="goz-ikonu" onclick="sifreGoster('yeniSifre')">👁️</span>
+            </div>
+
+            <div class="input-group sifre-kutu">
+                <label>Yeni Şifre (Tekrar)</label>
+                <input type="password" id="yeniSifreTekrar" placeholder="Şifreniz (Tekrar)" required>
+                <span class="goz-ikonu" onclick="sifreGoster('yeniSifreTekrar')">👁️</span>
+            </div>
+            
+            <button type="submit">Şifremi Yenile</button>
+            <div id="mesaj" class="error-message"></div>
+        </form>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const eposta = urlParams.get('eposta');
+
+        if (!eposta) {
+            alert("Geçersiz işlem.");
+            window.location.href = "giris.html";
+        }
+
+        function sifreGoster(id) {
+            const el = document.getElementById(id);
+            if (el.type === "password") {
+                el.type = "text";
+            } else {
+                el.type = "password";
+            }
+        }
+
+        document.getElementById('yeniSifreFormu').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const otp = document.getElementById('otpCode').value;
+            const yeniSifre = document.getElementById('yeniSifre').value;
+            const yeniSifreTekrar = document.getElementById('yeniSifreTekrar').value;
+            const mesajDiv = document.getElementById('mesaj');
+
+            if (yeniSifre !== yeniSifreTekrar) {
+                mesajDiv.className = 'error-message';
+                mesajDiv.textContent = "Şifreler uyuşmuyor, lütfen kontrol edin.";
+                mesajDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/api/yeni-sifre-belirle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eposta, otp, yeniSifre })
+                });
+
+                const data = await response.json();
+
+                if (data.basarili) {
+                    mesajDiv.className = 'success-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = data.yonlendir || 'giris.html';
+                    }, 2000);
+                } else {
+                    mesajDiv.className = 'error-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                }
+            } catch (error) {
+                mesajDiv.className = 'error-message';
+                mesajDiv.textContent = 'Bağlantı hatası oluştu.';
+                mesajDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

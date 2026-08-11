@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şifremi Unuttum - ChimeVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #020617;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: radial-gradient(circle at 50% -20%, #1e3a8a, var(--bg-color) 60%);
+        }
+
+        .auth-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            padding: 3rem;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        h2 { font-size: 1.8rem; margin-bottom: 1rem; color: var(--text-main); }
+        p { color: var(--text-muted); margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5; }
+
+        .input-group { margin-bottom: 1.5rem; text-align: left; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .error-message { color: #ef4444; font-size: 0.9rem; margin-top: 1rem; display: none; }
+        .success-message { color: #10b981; font-size: 0.9rem; margin-top: 1rem; display: none; }
+        
+        .baglanti {
+            display: inline-block;
+            margin-top: 25px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .baglanti:hover { color: #f8fafc; }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <h2>Şifremi Unuttum</h2>
+        <p>E-posta adresinizi girin. Size 6 haneli bir şifre sıfırlama kodu göndereceğiz.</p>
+        
+        <form id="sifreSifirlamaFormu">
+            <div class="input-group">
+                <label for="eposta">E-posta Adresi</label>
+                <input type="email" id="eposta" placeholder="ornek@mail.com" required autocomplete="off">
+            </div>
+            
+            <button type="submit" id="gonderBtn">Kodu Gönder</button>
+            <div id="mesaj" class="error-message"></div>
+        </form>
+        <a href="giris.html" class="baglanti">Giriş Ekranına Dön</a>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        document.getElementById('sifreSifirlamaFormu').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const eposta = document.getElementById('eposta').value;
+            const mesajDiv = document.getElementById('mesaj');
+            const gonderBtn = document.getElementById('gonderBtn');
+
+            gonderBtn.disabled = true;
+            gonderBtn.textContent = "Gönderiliyor...";
+            mesajDiv.style.display = 'none';
+
+            try {
+                const response = await fetch(`${API_URL}/api/sifre-sifirlama-talebi`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eposta })
+                });
+
+                const data = await response.json();
+
+                if (data.basarili) {
+                    mesajDiv.className = 'success-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = data.yonlendir || 'yeni_sifre.html?eposta=' + encodeURIComponent(eposta);
+                    }, 2000);
+                } else {
+                    mesajDiv.className = 'error-message';
+                    mesajDiv.textContent = data.mesaj;
+                    mesajDiv.style.display = 'block';
+                    gonderBtn.disabled = false;
+                    gonderBtn.textContent = "Kodu Gönder";
+                }
+            } catch (error) {
+                mesajDiv.className = 'error-message';
+                mesajDiv.textContent = 'Bağlantı hatası oluştu.';
+                mesajDiv.style.display = 'block';
+                gonderBtn.disabled = false;
+                gonderBtn.textContent = "Kodu Gönder";
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChimeVerse - Giris</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: radial-gradient(circle at top left, #0f172a, #020617);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(249,115,22,0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+            z-index: -1;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .kutu {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            padding: 50px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2 { 
+            margin-top: 0; 
+            font-size: 28px;
+            background: linear-gradient(135deg, #f97316 0%, #fb923c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 30px;
+        }
+        input {
+            width: 100%;
+            padding: 16px;
+            margin: 12px 0;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 12px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        input:focus {
+            border-color: #f97316;
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.15);
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(234, 88, 12, 0.4);
+        }
+        button:active {
+            transform: translateY(1px);
+        }
+        .hata { color: #ef4444; margin-bottom: 15px; font-size: 14px; font-weight: 500; }
+        .baglanti {
+            display: inline-block;
+            margin-top: 25px;
+            color: #94a3b8;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .baglanti:hover { color: #f8fafc; }
+        .sifre-kutu { position: relative; width: 100%; margin: 12px 0; }
+        .sifre-kutu input { width: 100%; margin: 0; padding-right: 40px; }
+        .goz-ikonu { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; opacity: 0.7; user-select: none; }
+        .goz-ikonu:hover { opacity: 1; }
+    </style>
+</head>
+<body>
+    <div class="kutu">
+        <h2>Giris Yap</h2>
+        <div id="hataMesaji" class="hata"></div>
+        <input type="email" id="eposta" placeholder="E-posta Adresi">
+        <div class="sifre-kutu">
+            <input type="password" id="sifre" placeholder="Sifre">
+            <span class="goz-ikonu" onclick="sifreGoster('sifre')">👁️</span>
+        </div>
+        <button onclick="girisYap()">Giris</button>
+        <a href="sifremi_unuttum.html" class="baglanti" style="display: block; margin-top: 15px;">Sifremi unuttum</a>
+        <a href="kayit.html" class="baglanti">Hesabiniz yok mu? Kayit olun</a>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        function sifreGoster(id) {
+            const el = document.getElementById(id);
+            if (el.type === "password") {
+                el.type = "text";
+            } else {
+                el.type = "password";
+            }
+        }
+        if(localStorage.getItem('kullaniciAdi')) {
+            window.location.href = 'index.html';
+        }
+
+        async function girisYap() {
+            const eposta = document.getElementById('eposta').value;
+            const sifre = document.getElementById('sifre').value;
+            const hataDiv = document.getElementById('hataMesaji');
+
+            if(!eposta || !sifre) {
+                hataDiv.textContent = "E-posta adresi ve sifre bos olamaz.";
+                return;
+            }
+
+            try {
+                const yanit = await fetch(API_URL + '/api/giris', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ eposta, sifre })
+                });
+
+                const sonuc = await yanit.json();
+                
+                if(sonuc.basarili) {
+                    localStorage.setItem('kullaniciAdi', sonuc.kullaniciAdi);
+                    localStorage.setItem('token', sonuc.token);
+                    window.location.href = 'index.html';
+                } else {
+                    hataDiv.textContent = sonuc.mesaj;
+                    if(sonuc.yonlendir) {
+                        setTimeout(() => {
+                            window.location.href = sonuc.yonlendir;
+                        }, 2500);
+                    }
+                }
+            } catch (hata) {
+                hataDiv.textContent = "Baglanti hatasi olustu.";
+            }
+        }
+    </script>
+</body>
+</html>
