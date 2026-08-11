@@ -29,7 +29,7 @@ Platformumuz standart bir sohbet altyapısının çok ötesindedir. Bizi sektör
 Genel odalardaki gürültüden uzaklaşmak isteyen kullanıcılar, aktif listesinden dilediği kişinin ismine tıklayarak tamamen izole, şifreli bir özel mesajlaşma penceresi açabilir. Bu mesajlar odaya yayınlanmaz (Broadcast edilmez), doğrudan hedefe iletilir. Bu sayede kurum içi departman gizliliği (Örn: Muhasebe ile İK arasındaki özel konuşmalar) güvence altına alınır.
 
 
-> ![Özel Mesajlaşma (DM)](gorseller/oozel_mesaj.png)
+> ![Özel Mesajlaşma (DM)](gorseller/ooozel_mesaj.png)
 
 ### 2.2. Emojiler ve Reaksiyon Entegrasyonu
 Modern iletişimin vazgeçilmezi olan duyguları yansıtma yeteneği platforma entegre edilmiştir. Soğuk ve resmi metin iletişimini ısıtan emojiler, HTML5 standartlarında kayıpsız olarak karşı tarafa anında iletilir.
