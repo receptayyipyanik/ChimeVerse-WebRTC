@@ -1,0 +1,4 @@
+node_modules/
+.env
+Istemci/uploads/*
+!Istemci/uploads/.gitkeep

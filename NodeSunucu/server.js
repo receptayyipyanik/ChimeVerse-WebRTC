@@ -22,7 +22,7 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const PORT = 8080;
-const SECRET_KEY = "gizli_anahtar_degistirin"; 
+const SECRET_KEY = process.env.JWT_SECRET || process.env.SECRET_KEY || "gizli_anahtar_degistirin"; 
 
 const onayBekleyenKullanicilar = new Map();
 
@@ -311,7 +311,7 @@ app.post('/api/yeni-sifre-belirle', apiLimiter, async (req, res) => {
     });
 });
 
-app.post('/api/upload', (req, res) => {
+app.post('/api/upload', apiLimiter, (req, res) => {
     upload.single('dosya')(req, res, function (err) {
         if (err instanceof multer.MulterError) {
             return res.status(400).json({ basarili: false, mesaj: 'Dosya yükleme hatası: ' + err.message });
